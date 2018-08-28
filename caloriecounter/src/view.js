@@ -3,6 +3,7 @@ import * as R from 'ramda';
 import { h } from 'virtual-dom';
 import {
   caloriesInputMsg,
+  deleteMealMsg,
   mealInputMsg,
   saveMealMsg,
   showFormMsg
@@ -21,7 +22,8 @@ const {
   tbody,
   tr,
   th,
-  td
+  td,
+  i
 } = hh(h);
 
 function fieldSet(labelText, inputValue, oninput) {
@@ -101,7 +103,12 @@ function mealRow(dispatch, className, meal) {
   return tr({ className }, [
     cell(td, 'pa2', meal.description),
     cell(td, 'pa2 tr', meal.calories),
-    cell(td, 'pa2 tr', [])
+    cell(td, 'pa2 tr', [
+      i({
+        className: 'ph1 fa fa-trash-o pointer',
+        onclick: () => dispatch(deleteMealMsg(meal.id))
+      })
+    ])
   ]);
 }
 
