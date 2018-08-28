@@ -1,6 +1,11 @@
 import hh from 'hyperscript-helpers';
 import { h } from 'virtual-dom';
-import { caloriesInputMsg, mealInputMsg, showFormMsg } from './update';
+import {
+  caloriesInputMsg,
+  mealInputMsg,
+  saveMealMsg,
+  showFormMsg
+} from './update';
 
 const { pre, div, h1, button, form, label, input } = hh(h);
 
@@ -35,15 +40,24 @@ function buttonSet(dispatch) {
 
 function formView(dispatch, { description, calories, showForm }) {
   if (showForm) {
-    return form({ className: 'w-100 mv2' }, [
-      fieldSet('Meal', description, e =>
-        dispatch(mealInputMsg(e.target.value))
-      ),
-      fieldSet('Calories', calories || '', e =>
-        dispatch(caloriesInputMsg(e.target.value))
-      ),
-      buttonSet(dispatch)
-    ]);
+    return form(
+      {
+        className: 'w-100 mv2',
+        onsubmit: e => {
+          e.preventDefault();
+          dispatch(saveMealMsg);
+        }
+      },
+      [
+        fieldSet('Meal', description, e =>
+          dispatch(mealInputMsg(e.target.value))
+        ),
+        fieldSet('Calories', calories || '', e =>
+          dispatch(caloriesInputMsg(e.target.value))
+        ),
+        buttonSet(dispatch)
+      ]
+    );
   }
 
   return button(
