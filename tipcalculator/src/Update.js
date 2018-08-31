@@ -15,16 +15,25 @@ export function tipChangedMsg(tip) {
 
 const toFloat = R.pipe(
   parseFloat,
-  R.defaultTo(0.0)
+  R.defaultTo(0.0),
+  Math.round
 );
+
+function calculate(model) {
+  const { bill, tipPercentage } = model;
+  const tip = (tipPercentage / 100) * bill;
+  const total = bill + tip;
+
+  return { ...model, tip, total };
+}
 
 function update(msg, model) {
   switch (msg.type) {
     case MSG.BILL_CHANGED: {
-      return { ...model, bill: toFloat(msg.bill) };
+      return calculate({ ...model, bill: toFloat(msg.bill) });
     }
     case MSG.TIP_CHANGED: {
-      return { ...model, tipPercentage: toFloat(msg.tip) };
+      return calculate({ ...model, tipPercentage: toFloat(msg.tip) });
     }
   }
 
