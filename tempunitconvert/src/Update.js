@@ -40,6 +40,70 @@ const toInt = R.pipe(
   R.defaultTo(0)
 );
 
+function convert(model) {
+  const { leftValue, leftUnit, rightValue, rightUnit } = model;
+
+  const [fromUnit, fromTemp, toUnit] = model.sourceLeft
+    ? [leftUnit, leftValue, rightUnit]
+    : [rightUnit, rightValue, leftUnit];
+
+  const otherValue = R.pipe(
+    convertFromToTemp,
+    Math.round
+  )(fromUnit, toUnit, fromTemp);
+
+  return model.sourceLeft
+    ? { ...model, rightValue: otherValue }
+    : { ...model, leftValue: otherValue };
+}
+
+function convertFromToTemp(fromUnit, toUnit, temp) {
+  const convertFn = R.pathOr(R.identity, [fromUnit, toUnit], UnitConversions);
+
+  return convertFn(temp);
+}
+
+function FahrenheitToCelsius(temp) {
+  return (5 / 9) * (temp - 32);
+}
+
+function CelsiusToFahrenheit(temp) {
+  return (9 / 5) * temp + 32;
+}
+
+function KelvinToCelsius(temp) {
+  return temp - 273.15;
+}
+
+function CelsiusToKelvin(temp) {
+  return temp + 273.15;
+}
+
+const FahrenheitToKelvin = R.pipe(
+  FahrenheitToCelsius,
+  CelsiusToKelvin
+);
+
+const KelvinToFahrenheit = R.pipe(
+  KelvinToCelsius,
+  CelsiusToFahrenheit
+);
+
+const UnitConversions = {
+  Celsius: {
+    Fahrenheit: CelsiusToFahrenheit,
+    Kelvin: CelsiusToKelvin
+  },
+  Fahrenheit: {
+    Celsius: FahrenheitToCelsius,
+    Kelvin: FahrenheitToKelvin
+  },
+  Kelvin: {
+    Celsius: KelvinToCelsius,
+    Fahrenheit: KelvinToFahrenheit
+  }
+};
+
 function update(msg, model) {
   switch (msg.type) {
     case MSG.LEFT_VALUE_INPUT: {
@@ -48,7 +112,7 @@ function update(msg, model) {
       }
 
       const leftValue = toInt(msg.value);
-      return { ...model, sourceLeft: true, leftValue };
+      return convert({ ...model, sourceLeft: true, leftValue });
     }
     case MSG.RIGHT_VALUE_INPUT: {
       if (msg.value === '') {
@@ -56,15 +120,15 @@ function update(msg, model) {
       }
 
       const rightValue = toInt(msg.value);
-      return { ...model, sourceLeft: false, rightValue };
+      return convert({ ...model, sourceLeft: false, rightValue });
     }
     case MSG.LEFT_UNIT_CHANGED: {
       const { unit: leftUnit } = msg;
-      return { ...model, leftUnit };
+      return convert({ ...model, sourceLeft: true, leftUnit });
     }
     case MSG.RIGHT_UNIT_CHANGED: {
       const { unit: rightUnit } = msg;
-      return { ...model, rightUnit };
+      return convert({ ...model, sourceLeft: false, rightUnit });
     }
   }
 

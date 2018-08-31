@@ -2,10 +2,10 @@ import hh from 'hyperscript-helpers';
 import * as R from 'ramda';
 import { h } from 'virtual-dom';
 import {
-  leftValueInputMsg,
-  rightValueInputMsg,
   leftUnitChanged,
-  rightUnitChanged
+  leftValueInputMsg,
+  rightUnitChanged,
+  rightValueInputMsg
 } from './Update';
 
 const { div, h1, pre, input, select, option } = hh(h);
@@ -50,7 +50,7 @@ function view(dispatch, model) {
       ),
       unitSection(
         dispatch,
-        model.leftUnit,
+        model.rightUnit,
         model.rightValue,
         rightValueInputMsg,
         rightUnitChanged
