@@ -1,6 +1,12 @@
 import hh from 'hyperscript-helpers';
 import * as R from 'ramda';
 import { h } from 'virtual-dom';
+import {
+  leftValueInputMsg,
+  rightValueInputMsg,
+  leftUnitChanged,
+  rightUnitChanged
+} from './Update';
 
 const { div, h1, pre, input, select, option } = hh(h);
 
@@ -13,16 +19,18 @@ function unitOptions(selectedUnit) {
   );
 }
 
-function unitSection(dispatch, unit, value) {
+function unitSection(dispatch, unit, value, inputMsg, unitMsg) {
   return div({ className: 'w-50 ma1' }, [
     input({
       type: 'text',
       className: 'db w-100 mv2 pa2 input-reset ba',
-      value
+      value,
+      oninput: e => dispatch(inputMsg(e.target.value))
     }),
     select(
       {
-        className: 'db w-100 pa2 ba input-reset br1 bg-white ba b--black'
+        className: 'db w-100 pa2 ba input-reset br1 bg-white ba b--black',
+        onchange: e => dispatch(unitMsg(e.target.value))
       },
       unitOptions(unit)
     )
@@ -33,8 +41,20 @@ function view(dispatch, model) {
   return div({ className: 'mw6 center' }, [
     h1({ className: 'f2 pv2 bb' }, 'Temperature Unit Converter'),
     div({ className: 'flex' }, [
-      unitSection(dispatch, model.leftUnit, model.leftValue),
-      unitSection(dispatch, model.leftUnit, model.rightValue)
+      unitSection(
+        dispatch,
+        model.leftUnit,
+        model.leftValue,
+        leftValueInputMsg,
+        leftUnitChanged
+      ),
+      unitSection(
+        dispatch,
+        model.leftUnit,
+        model.rightValue,
+        rightValueInputMsg,
+        rightUnitChanged
+      )
     ]),
     pre(JSON.stringify(model, null, 2))
   ]);
